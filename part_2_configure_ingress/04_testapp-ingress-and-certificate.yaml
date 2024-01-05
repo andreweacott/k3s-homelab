@@ -1,4 +1,4 @@
-# Create a certificate secret matching the TLS cert specified above 
+# Create a certificate secret for the TLS cert we'll use in the ingress
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
