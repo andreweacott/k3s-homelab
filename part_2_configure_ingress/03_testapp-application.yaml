@@ -1,0 +1,42 @@
+# Define a deployment in the 'testapp' namesapce using the 'nginx' image, 
+# Deployment listens on port 80
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: testapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+
+---
+
+# Define a service for the 'nginx' deployment in the 'testapp' namespace
+# Service should listen on HTTP 80 and HTTPS 443
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  namespace: testapp
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: https
+  selector:
+    app: nginx

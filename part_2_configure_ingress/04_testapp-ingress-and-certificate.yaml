@@ -1,0 +1,47 @@
+# Create a certificate secret matching the TLS cert specified above 
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: testapp-cluster-mydomain-org-tls
+  namespace: testapp
+spec:
+  commonName: testapp.cluster.mydomain.org
+  secretName: testapp-cluster-mydomain-org-tls
+  dnsNames:
+    - testapp.cluster.mydomain.org
+  issuerRef:
+    name: selfsigned
+    kind: ClusterIssuer
+
+---
+
+# Define an NGINX TLS ingress in the 'testapp' namespace for the 'nginx-svc' service
+# Uses the 'selfsigned' cluster issuer we set up earlier
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: testapp-ingress
+  namespace: testapp
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned
+    nginx.ingress.kubernetes.io/router.tls: "true"
+spec:
+  # Specifies use of the 'nginx' ingress controller
+  ingressClassName: nginx
+  rules:
+
+  # Match requests for hostname 'testapp.cluster.mydomain.org' to this ingress service
+  - host: testapp.cluster.mydomain.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-svc
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - testapp.cluster.mydomain.org
+    secretName: testapp-cluster-mydomain-org-tls
