@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpbin-vs
+spec:
+  hosts:
+  - httpbin.org
+  http:
+  - headers:
+      request:
+        remove:
+          - x-workload-name
+    route:
+    - destination:
+       host: httpbin.org
+       port:
+         number: 80

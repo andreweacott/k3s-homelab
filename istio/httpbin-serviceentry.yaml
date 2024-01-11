@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin
+  namespace: istio-system
+spec:
+  hosts: 
+    - httpbin.org
+  ports:
+    - number: 80
+      name: http-port
+      protocol: HTTP
+  resolution: DNS
+  endpoints:
+  - address: httpbin.org
+    labels:
+       app: httpbin
+      

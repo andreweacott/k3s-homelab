@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: add-x-workload-header
+  namespace: istio-system
+  annotations:
+    name: Add Workload Header
+    description: Adds an x-workload-header
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+          filterChain:
+            filter:
+              name: 'envoy.filters.network.http_connection_manager'
+              subFilter:
+                name: 'envoy.filters.http.router'
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.lua
+          typed_config:
+            '@type': 'type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua'
+            inlineCode: |
+              function envoy_on_request(request_handle)
+                local function isempty(s)
+                  return s == nil or s == ''
+                end
+                local request_headers = request_handle:headers()
+                local workload_name = os.getenv("ISTIO_META_WORKLOAD_NAME")
+                if not isempty(workload_name) then
+                  request_handle:headers():replace("x-workload-name", workload_name)
+                else
+                  request_handle:headers():replace("x-workload-name", "unknown")
+                end
+              end
